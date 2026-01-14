@@ -1,5 +1,5 @@
 export default async function AboutPage() {
-  const res = await fetch("https://jsonplaceholder.typicode.com/user");
+  const res = await fetch("https://jsonplaceholder.typicode.com/users");
 
   if (!res.ok) {
     return "Data Not found!";
