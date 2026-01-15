@@ -1,11 +1,11 @@
+export const dynamic = "force-dynamic";
+
 export default async function AboutPage() {
   const res = await fetch("https://jsonplaceholder.typicode.com/users");
 
   if (!res.ok) {
     return "Data Not found!";
   }
-
-  console.log(res);
 
   return (
     <div>
