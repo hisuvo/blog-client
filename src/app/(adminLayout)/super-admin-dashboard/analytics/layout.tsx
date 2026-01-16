@@ -9,10 +9,10 @@ export default function AnalyticLayout({
   return (
     <div>
       <div className="space-x-2">
-        <Button asChild>
+        <Button variant={"outline"} asChild>
           <Link href="/dashboard/analytics/weekly">Weekly</Link>
         </Button>
-        <Button asChild>
+        <Button variant={"outline"} asChild>
           <Link href="/dashboard/analytics/monthly">monthly</Link>
         </Button>
       </div>
