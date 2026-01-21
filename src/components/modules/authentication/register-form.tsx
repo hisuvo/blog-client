@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
-export function SignupForm({
+export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
