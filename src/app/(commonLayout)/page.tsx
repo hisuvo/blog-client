@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
+import { userService } from "@/services/user.services";
 
 export default async function Home() {
-  const getSession = await authClient.getSession();
+  const session = await userService.getSession();
 
-  console.log("session information", getSession);
-
+  console.log(session.data, "user and session information");
   return (
     <div>
       <Button variant="outline">Button Ui Components</Button>

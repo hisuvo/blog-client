@@ -25,8 +25,9 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const handleGoogleLoin = async () => {
-    const data = await authClient.signIn.social({
+    return await authClient.signIn.social({
       provider: "google",
+      callbackURL: "http://localhost:3000",
     });
   };
 
