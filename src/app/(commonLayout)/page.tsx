@@ -1,13 +1,16 @@
-import { Button } from "@/components/ui/button";
-import { userService } from "@/services/user.services";
+import { BlogCard } from "@/components/modules/homepage/BlogCard";
+import { blogServices } from "@/services/blog.services";
+import { Blog } from "@/types";
 
 export default async function Home() {
-  const session = await userService.getSession();
+  const { data } = await blogServices.getBlogPosts();
 
-  console.log(session.data, "user and session information");
+  console.log(data);
   return (
-    <div>
-      <Button variant="outline">Button Ui Components</Button>
+    <div className="grid grid-cols-3 max-w-7xl mx-auto px-4 gap-5">
+      {data?.data.map((post: Blog) => (
+        <BlogCard key={post.id} {...post} />
+      ))}
     </div>
   );
 }
