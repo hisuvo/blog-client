@@ -1,25 +1,74 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import * as z from "zod";
+import { useForm } from "@tanstack/react-form";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
+
+const formSchema = z.object({
+  name: z.string().min(3, "Your name is required"),
+  password: z.string().min(8, "Minimum length is 8"),
+  email: z.email(),
+});
 
 export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const handleGoogleLoin = async () => {
+    return await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "http://localhost:3000",
+    });
+  };
+
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+    validators: {
+      onSubmit: formSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const toastId = toast.loading("Creating User");
+      try {
+        const { data, error } = await authClient.signUp.email(value);
+
+        if (error) {
+          toast.error(error.message, { id: toastId });
+          return;
+        }
+
+        toast.success("User created successfull", { id: toastId });
+      } catch (error) {
+        toast.error("something went error", { id: toastId });
+      }
+      console.log(value);
+    },
+  });
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -30,47 +79,123 @@ export function RegisterForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form
+            id="register-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+          >
             <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="name">Full Name</FieldLabel>
-                <Input id="name" type="text" placeholder="John Doe" required />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
-              </Field>
-              <Field>
-                <Field className="grid grid-cols-2 gap-4">
-                  <Field>
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Input id="password" type="password" required />
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="confirm-password">
-                      Confirm Password
-                    </FieldLabel>
-                    <Input id="confirm-password" type="password" required />
-                  </Field>
-                </Field>
-                <FieldDescription>
-                  Must be at least 8 characters long.
-                </FieldDescription>
-              </Field>
-              <Field>
-                <Button type="submit">Create Account</Button>
-                <FieldDescription className="text-center">
-                  Already have an account? <Link href="/login">Log-In</Link>
-                </FieldDescription>
-              </Field>
+              <form.Field
+                name="name"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  return (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                      <Input
+                        type="text"
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+
+                      {isInvalid && (
+                        <FieldError
+                          errors={field.state.meta.errors}
+                        ></FieldError>
+                      )}
+                    </Field>
+                  );
+                }}
+              ></form.Field>
+
+              <form.Field
+                name="email"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  return (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                      <Input
+                        type="email"
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+                      {isInvalid && (
+                        <FieldError
+                          errors={field.state.meta.errors}
+                        ></FieldError>
+                      )}
+                    </Field>
+                  );
+                }}
+              ></form.Field>
+
+              <form.Field
+                name="password"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  return (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                      <Input
+                        type="password"
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+
+                      {isInvalid && (
+                        <FieldError
+                          errors={field.state.meta.errors}
+                        ></FieldError>
+                      )}
+                    </Field>
+                  );
+                }}
+              ></form.Field>
             </FieldGroup>
           </form>
         </CardContent>
+        <CardFooter className="flex ">
+          <Button form="register-form" type="submit" className="w-full">
+            Submit
+          </Button>
+        </CardFooter>
+
+        <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+          Or continue with
+        </FieldSeparator>
+
+        <CardFooter>
+          <Button
+            onClick={() => handleGoogleLoin()}
+            variant="outline"
+            type="button"
+            className="w-full"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path
+                d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                fill="currentColor"
+              />
+            </svg>
+            Login with Google
+          </Button>
+        </CardFooter>
+
+        <FieldDescription className="text-center">
+          Don&apos;t have an account? <Link href="/login">Log-in</Link>
+        </FieldDescription>
       </Card>
       <FieldDescription className="px-6 text-center">
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
@@ -79,3 +204,15 @@ export function RegisterForm({
     </div>
   );
 }
+
+/**
+ * email
+: 
+"dattasuvo7@gmaill.com"
+name
+: 
+"Anupom Datta"
+password
+: 
+"SD$@sd24"
+ */
