@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Blog } from "@/types";
 import Image from "next/image";
+import Link from "next/link";
 
 export function BlogCard(post: Blog) {
   return (
@@ -34,7 +35,9 @@ export function BlogCard(post: Blog) {
         <CardDescription>{post?.content}</CardDescription>
       </CardHeader>
       <CardFooter>
-        <Button className="w-full">View Event</Button>
+        <Link href={`/blog/${post?.id}`}>
+          <Button className="w-full">View Event</Button>
+        </Link>
       </CardFooter>
     </Card>
   );
